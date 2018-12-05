@@ -1,0 +1,204 @@
+SQL> -- ---------------------------------------------------------------
+SQL> --
+SQL> -- Name: < ***** Brandon Conn ***** >
+SQL> --
+SQL> -- ------------------------------------------------------------
+SQL> -- NULL AND SUBSTRINGS -------------------------------
+SQL> --
+SQL> /*(10A)
+SQL> Find the ssn and last name of every employee who doesn't have a  supervisor, or his last name contains at least two occurences of the letter 'a'. Sort the results by ssn.
+SQL> */
+SQL> 
+SQL> SELECT   Ssn, Lname
+  2  FROM     Employee
+  3  WHERE    Super_ssn IS NULL OR
+  4  	      Lname LIKE '%a%' AND
+  5  	      Lname LIKE '%a%'
+  6  ORDER BY Ssn;
+
+SSN       LNAME                                                                 
+--------- ---------------                                                       
+666884444 Narayan                                                               
+888665555 Borg                                                                  
+987654321 Wallace                                                               
+987987987 Jabbar                                                                
+999887777 Zelaya                                                                
+
+SQL> 
+SQL> /*(11A)
+SQL> For every employee who works more than 30 hours on any project: Find the ssn, lname, project number, project name, and numer of hours. Sort the results by ssn.
+SQL> */
+SQL> 
+SQL> SELECT   E.Ssn, E.Lname, P.Pnumber, P.Pname, W.Hours
+  2  FROM     Employee E, Project P, Works_on W
+  3  WHERE    W.Hours > 30 AND
+  4  	      W.Essn = E.Ssn AND
+  5  	      W.Pno = P.Pnumber
+  6  ORDER BY Ssn;
+
+SSN       LNAME              PNUMBER PNAME                HOURS                 
+--------- --------------- ---------- --------------- ----------                 
+123456789 Smith                    1 ProductX              32.5                 
+666884444 Narayan                  3 ProductZ                40                 
+987987987 Jabbar                  10 Computerization         35                 
+
+SQL> 
+SQL> /*(12A)
+SQL> Write a query that consists of one block only.
+SQL> For every employee who works on a project that is not controlled by the department he works for: Find the employee's lname, the department he works for, the project number that he works on, and the number of the department that controls that project. Sort the results by lname.
+SQL> */
+SQL> 
+SQL> SELECT   E.Lname, E.Dno, W.Pno, P.Pnumber, P.Dnum
+  2  FROM     Employee E, Project P, Works_on W
+  3  WHERE    P.Dnum != E.Dno AND
+  4  	      W.pno = P.Pnumber AND
+  5  	      E.Ssn = W.Essn
+  6  ORDER BY Lname;
+
+LNAME                  DNO        PNO    PNUMBER       DNUM                     
+--------------- ---------- ---------- ---------- ----------                     
+Wallace                  4         20         20          1                     
+Wong                     5         20         20          1                     
+Wong                     5         10         10          4                     
+
+SQL> 
+SQL> /*(13A)
+SQL> For every employee who works for more than 20 hours on any project that is located in the same location as his department: Find the ssn, lname, project number, project location, department number, and department location.Sort the results by lname
+SQL> */
+SQL> 
+SQL> SELECT   distinct E.Ssn, E.Lname, W.Pno, P.Plocation, P.Dnum, P.Plocation
+  2  FROM     Employee E, Project P, Works_on W, Dept_locations D
+  3  WHERE    P.Dnum = E.Dno AND
+  4  	      W.Hours > 20 AND
+  5  	      W.pno = P.Pnumber AND
+  6  	      E.Ssn = W.Essn AND
+  7  	      D.Dlocation = P.Plocation
+  8  ORDER BY Lname;
+
+SSN       LNAME                  PNO PLOCATION             DNUM PLOCATION       
+--------- --------------- ---------- --------------- ---------- --------------- 
+987987987 Jabbar                  10 Stafford                 4 Stafford        
+666884444 Narayan                  3 Houston                  5 Houston         
+123456789 Smith                    1 Bellaire                 5 Bellaire        
+999887777 Zelaya                  30 Stafford                 4 Stafford        
+
+SQL> 
+SQL> /*(14A)
+SQL> Write a query that consists of one block only.
+SQL> For every employee whose salary is less than 70% of his immediate supervisor's salary: Find his ssn, lname, salary; and his supervisor's ssn, lname, and salary. Sort the results by ssn.
+SQL> */
+SQL> 
+SQL> SELECT   E1.Ssn, E1.Lname, E1.Salary, E2.Ssn, E2.Lname, E2.Salary
+  2  FROM     Employee E1, Employee E2
+  3  WHERE    E1.Super_ssn = E2.ssn AND
+  4  	      E1.Salary < E2.Salary*0.70
+  5  ORDER BY E1.Ssn;
+
+SSN       LNAME               SALARY SSN       LNAME               SALARY       
+--------- --------------- ---------- --------- --------------- ----------       
+453453453 English              25000 333445555 Wong                 40000       
+987987987 Jabbar               25000 987654321 Wallace              43000       
+999887777 Zelaya               25000 987654321 Wallace              43000       
+
+SQL> 
+SQL> /*(15A)
+SQL> For projects located in Houston: Find pairs of last names such that the two employees in the pair work on the same project. Remove duplicates. Sort the result by the lname in the left column in the result.
+SQL> */
+SQL> 
+SQL> SELECT    E1.Lname, W1.Pno, E2.Lname, W2.Pno, P.Plocation
+  2  FROM      Employee E1, Employee E2, Works_On W1, Works_On W2, Project P
+  3  WHERE     E1.Ssn = W1.Essn AND
+  4  	       E2.Ssn = W2.Essn AND
+  5  	       E1.Ssn > E2.Ssn AND
+  6  	       W1.Pno = W2.Pno AND
+  7  	       W1.Pno = P.Pnumber AND
+  8  	       P.PLocation = 'Houston'
+  9  ORDER BY  E1.Lname;
+
+LNAME                  PNO LNAME                  PNO PLOCATION                 
+--------------- ---------- --------------- ---------- ---------------           
+Borg                    20 Wong                    20 Houston                   
+Narayan                  3 Wong                     3 Houston                   
+Wallace                 20 Borg                    20 Houston                   
+Wallace                 20 Wong                    20 Houston                   
+
+SQL> 
+SQL> /*(16A) Hint: A NULL in the hours column should be considered as zero hours.
+SQL> Find the ssn, lname, and the total number of hours worked on projects for every employee whose total is less than 40 hours. Sort the result by lname
+SQL> */
+SQL> 
+SQL> SELECT   E.Ssn, E.Lname, SUM(W.Hours)
+  2  FROM     Employee E, Works_on W
+  3  WHERE    E.Ssn = W.Essn
+  4  GROUP BY E.Ssn, E.Lname
+  5  HAVING   SUM(W.Hours) < 40
+  6  ORDER BY Lname;
+
+SSN       LNAME           SUM(W.HOURS)                                          
+--------- --------------- ------------                                          
+987654321 Wallace                   35                                          
+
+SQL> 
+SQL> /*(17A)
+SQL> For every project that has more than 2 employees working on it: Find the project number, project name, number of employees working on it, and the total number of hours worked by all employees on that project. Sort the results by project number.
+SQL> */
+SQL> 
+SQL> SELECT    P.Pnumber, P.Pname, COUNT(*), SUM(W1.Hours)
+  2  FROM      Employee E1, Employee E2, Works_On W1, Works_On W2, Project P
+  3  WHERE     E1.Ssn = W1.Essn AND
+  4  	       E2.Ssn = W2.Essn AND
+  5  	       E1.Ssn > E2.Ssn AND
+  6  	       W1.Pno = W2.Pno AND
+  7  	       W1.Pno = P.Pnumber
+  8  GROUP BY  P.Pnumber, P.Pname
+  9  HAVING    COUNT(*) > 2
+ 10  ORDER BY  P.Pnumber;
+
+   PNUMBER PNAME             COUNT(*) SUM(W1.HOURS)                             
+---------- --------------- ---------- -------------                             
+         2 ProductY                 3            50                             
+        10 Computerization          3            55                             
+        20 Reorganization           3            30                             
+        30 Newbenefits              3            65                             
+
+SQL> 
+SQL> /*(18A)
+SQL> For every employee who has the highest salary in his department: Find the dno, ssn, lname, and salary . Sort the results by department number.
+SQL> */
+SQL> 
+SQL> 
+SQL> 
+SQL> --
+SQL> -- NON-CORRELATED SUBQUERY -------------------------------
+SQL> --
+SQL> /*(19A)
+SQL> For every employee who does not work on any project that is located in Houston: Find the ssn and lname. Sort the results by lname
+SQL> */
+SQL> -- <<< Your SQL code goes here >>>
+SQL> --
+SQL> -- DIVISION ---------------------------------------------
+SQL> --
+SQL> /*(20A) Hint: This is a DIVISION query
+SQL> For every employee who works on every project that is located in Stafford: Find the ssn and lname. Sort the results by lname
+SQL> */
+SQL> 
+SQL> SELECT   E.Ssn, E.Lname
+  2  FROM     Employee E
+  3  WHERE    NOT EXISTS ((SELECT P.Pnumber
+  4  			  FROM Project P
+  5  			  WHERE P.Plocation = 'Stafford')
+  6  			MINUS
+  7  			 (SELECT P.Pnumber
+  8  			  FROM Works_on W, Project P
+  9  			  WHERE W.Pno = P.Pnumber AND
+ 10  				W.Essn = E.Ssn AND
+ 11  				P.Plocation = 'Stafford'))
+ 12  ORDER BY Lname;
+
+SSN       LNAME                                                                 
+--------- ---------------                                                       
+987987987 Jabbar                                                                
+999887777 Zelaya                                                                
+
+SQL> 
+SQL> SET ECHO OFF
